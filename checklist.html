@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>每日治療記錄系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Microsoft JhengHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background:#f5f7fa;
+            margin:0;
+            padding:20px;
+        }
+        .container {
+            max-width:1100px;
+            margin:0 auto;
+            background:#fff;
+            border-radius:10px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.08);
+            padding:20px 25px 30px;
+        }
+        h1 { margin-top:0; text-align:center; margin-bottom:15px; }
+        .section {
+            border:1px solid #e0e0e0;
+            border-radius:8px;
+            padding:15px 15px 5px;
+            margin-bottom:15px;
+            background:#fafafa;
+        }
+        .section h2 {
+            margin:0 0 10px;
+            font-size:1.1rem;
+            border-left:4px solid #1976d2;
+            padding-left:8px;
+        }
+        .field-row {
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-bottom:10px;
+        }
+        .field {
+            flex:1 1 180px;
+            min-width:150px;
+        }
+        label {
+            display:block;
+            font-size:0.9rem;
+            margin-bottom:4px;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width:100%;
+            padding:6px 8px;
+            border-radius:4px;
+            border:1px solid #ccc;
+            font-size:0.9rem;
+        }
+        textarea { min-height:50px; resize:vertical; }
+        .checkbox-group {
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px 18px;
+            margin-bottom:8px;
+            align-items:center;
+        }
+        .checkbox-item { font-size:0.9rem; white-space:nowrap; }
+        .checkbox-item input { margin-right:4px; }
+        .btn-row {
+            margin-top:15px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            justify-content:flex-start;
+        }
+        button {
+            border:none;
+            border-radius:4px;
+            padding:8px 14px;
+            font-size:0.9rem;
+            cursor:pointer;
+        }
+        .btn-primary { background:#1976d2; color:white; }
+        .btn-secondary { background:#4caf50; color:white; }
+        .btn-danger { background:#e53935; color:white; }
+        .records-table {
+            width:100%;
+            border-collapse:collapse;
+            margin-top:15px;
+            font-size:0.85rem;
+        }
+        .records-table th,
+        .records-table td {
+            border:1px solid #ddd;
+            padding:4px 6px;
+            text-align:left;
+            vertical-align:top;
+        }
+        .records-table th {
+            background:#f0f0f0;
+            position:sticky;
+            top:0;
+            z-index:1;
+        }
+        .table-wrapper {
+            max-height:260px;
+            overflow:auto;
+            margin-top:10px;
+            border:1px solid #ddd;
+            border-radius:4px;
+        }
+        @media (max-width:600px){
+            .container { padding:12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>每日治療記錄系統</h1>
+
+    <form id="recordForm">
+        <!-- 一、基本狀態 -->
+        <div class="section">
+            <h2>一、基本狀態</h2>
+            <div class="field-row">
+                <div class="field">
+                    <label for="date">1. 日期</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="field">
+                    <label for="steps">2. 今日步數</label>
+                    <input type="number" id="steps" min="0" placeholder="例如：6500">
+                </div>
+                <div class="field">
+                    <label for="pain">3. 疼痛程度 (1-10)</label>
+                    <select id="pain">
+                        <option value="">請選擇</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="swelling">4. 腫脹程度 (1-10)</label>
+                    <select id="swelling">
+                        <option value="">請選擇</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="walkMinutes">5. 連續走路多久開始痛 (分鐘)</label>
+                    <input type="number" id="walkMinutes" min="0" placeholder="例如：10">
+                </div>
+                <div class="field">
+                    <label for="standMinutes">6. 連續站立多久開始痛 (分鐘)</label>
+                    <input type="number" id="standMinutes" min="0" placeholder="例如：5">
+                </div>
+            </div>
+        </div>
+
+        <!-- 二、功能表現 -->
+        <div class="section">
+            <h2>二、功能表現</h2>
+            <div class="field-row">
+                <div class="field">
+                    <label for="upStairs">1. 上樓梯</label>
+                    <select id="upStairs">
+                        <option value="">請選擇</option>
+                        <option>正常</option><option>微痛</option><option>痛</option><option>需扶手</option><option>無法</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="downStairs">2. 下樓梯</label>
+                    <select id="downStairs">
+                        <option value="">請選擇</option>
+                        <option>正常</option><option>微痛</option><option>痛</option><option>需扶手</option><option>無法</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="squat">3. 蹲下</label>
+                    <select id="squat">
+                        <option value="">請選擇</option>
+                        <option>正常</option><option>微痛</option><option>痛</option><option>無法</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="ankleTwist">4. 腳踝扭轉</label>
+                    <select id="ankleTwist">
+                        <option value="">請選擇</option>
+                        <option>正常</option><option>微痛</option><option>痛</option><option>無法</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="singleLeg">5. 單腳站立</label>
+                    <select id="singleLeg">
+                        <option value="">請選擇</option>
+                        <option>可</option><option>困難</option><option>無法</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="drive">6. 開車</label>
+                    <select id="drive">
+                        <option value="">請選擇</option>
+                        <option>可</option>
+                        <option>疼痛</option>
+                        <option>困難</option>
+                        <option>無法</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 三、復健與治療 -->
+        <div class="section">
+            <h2>三、復健與治療（複選）</h2>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="rehab" value="高能量雷射">高能量雷射</label>
+                <label class="checkbox-item"><input type="checkbox" name="rehab" value="玻尿酸注射">玻尿酸注射</label>
+                <label class="checkbox-item"><input type="checkbox" name="rehab" value="電療">電療</label>
+                <label class="checkbox-item"><input type="checkbox" name="rehab" value="紅外線">紅外線</label>
+                <label class="checkbox-item"><input type="checkbox" name="rehab" value="超音波">超音波</label>
+                <label class="checkbox-item"><input type="checkbox" name="rehab" value="雷射">雷射</label>
+                <label class="checkbox-item"><input type="checkbox" name="rehab" value="針灸">針灸</label>
+            </div>
+        </div>
+
+        <!-- 四、處置 -->
+        <div class="section">
+            <h2>四、處置（複選）</h2>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="care" value="冰敷">冰敷</label>
+                <label class="checkbox-item"><input type="checkbox" name="care" value="熱敷">熱敷</label>
+                <label class="checkbox-item"><input type="checkbox" name="care" value="藥膏">藥膏</label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="careOtherChk" name="careOtherFlag" value="其他">其他
+                </label>
+                <div style="flex:1 1 200px; min-width:180px;">
+                    <input type="text" id="careOtherText" placeholder="例如：口服止痛藥、消炎藥等">
+                </div>
+            </div>
+        </div>
+
+        <!-- 五、輔具 -->
+        <div class="section">
+            <h2>五、輔具（複選）</h2>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="assist" value="拐杖">拐杖</label>
+                <label class="checkbox-item"><input type="checkbox" name="assist" value="輪椅">輪椅</label>
+                <label class="checkbox-item"><input type="checkbox" name="assist" value="護具">護具</label>
+            </div>
+        </div>
+
+        <!-- 六、功能受限 -->
+        <div class="section">
+            <h2>六、功能受限（複選）</h2>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="limit" value="跛行">跛行</label>
+                <label class="checkbox-item"><input type="checkbox" name="limit" value="走路速度緩慢">走路速度緩慢</label>
+                <label class="checkbox-item"><input type="checkbox" name="limit" value="久站困難">久站困難</label>
+                <label class="checkbox-item"><input type="checkbox" name="limit" value="穿鞋困難">穿鞋困難</label>
+                <label class="checkbox-item"><input type="checkbox" name="limit" value="洗澡困難">洗澡困難</label>
+                <label class="checkbox-item"><input type="checkbox" name="limit" value="睡覺被痛醒">睡覺被痛醒</label>
+                <label class="checkbox-item"><input type="checkbox" name="limit" value="無法搬重物">無法搬重物</label>
+            </div>
+        </div>
+
+        <!-- 七、其他照護需求 -->
+        <div class="section">
+            <h2>七、其他照護需求（簡答）</h2>
+            <textarea id="careNeed" placeholder="例如：需家人協助洗澡、上下樓、買菜等"></textarea>
+        </div>
+
+        <!-- 八、今日支出 -->
+        <div class="section">
+            <h2>八、今日支出</h2>
+            <input type="number" id="expense" min="0" placeholder="單位：元">
+        </div>
+
+        <!-- 九、備註 -->
+        <div class="section">
+            <h2>九、備註（簡答）</h2>
+            <textarea id="note" placeholder="其他想記錄的狀況"></textarea>
+        </div>
+
+        <div class="btn-row">
+            <button type="button" class="btn-primary" id="addRecordBtn">新增今日紀錄</button>
+            <button type="button" class="btn-secondary" id="exportCsvBtn">匯出 CSV</button>
+            <button type="button" class="btn-danger" id="clearAllBtn">清除本機所有紀錄</button>
+        </div>
+    </form>
+
+    <div class="table-wrapper" id="tableWrapper" style="display:none;">
+        <table class="records-table" id="recordsTable">
+            <thead>
+            <tr>
+                <th>日期</th>
+                <th>步數</th>
+                <th>疼痛</th>
+                <th>腫脹</th>
+                <th>走多久痛</th>
+                <th>站多久痛</th>
+                <th>功能表現</th>
+                <th>復健與治療</th>
+                <th>處置</th>
+                <th>輔具</th>
+                <th>功能受限</th>
+                <th>其他照護需求</th>
+                <th>今日支出</th>
+                <th>備註</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+window.addEventListener('load', function () {
+    var LS_KEY = "ankle_treatment_records_v6";
+    var API_URL = "https://script.google.com/macros/s/AKfycbxNHFOTnED1lP-OBnF5g6aVXUDkEP8o6js4QxOa0xoTbbhC6mRW2zdhofRD7lDaxeHCrA/exec";
+
+
+    function getCheckedValues(name){
+        var nodes = document.querySelectorAll('input[name="' + name + '"]:checked');
+        var result = [];
+        for (var i = 0; i < nodes.length; i++) {
+            result.push(nodes[i].value);
+        }
+        return result;
+    }
+
+// 從 localStorage 讀（同步用）
+// 真正資料來源會在 syncFromCloud() 時從雲端覆寫
+
+function getCheckedValues(name){
+    var nodes = document.querySelectorAll('input[name="' + name + '"]:checked');
+    var result = [];
+    for (var i = 0; i < nodes.length; i++) {
+        result.push(nodes[i].value);
+    }
+    return result;
+}
+
+// 把 ISO 字串 / Date 物件轉成 yyyy-mm-dd
+function toDateOnly(val) {
+    if (!val) return "";
+    // 若是 Date 物件
+    if (Object.prototype.toString.call(val) === "[object Date]") {
+        var y = val.getFullYear();
+        var m = ("0" + (val.getMonth() + 1)).slice(-2);
+        var d = ("0" + val.getDate()).slice(-2);
+        return y + "-" + m + "-" + d;
+    }
+    // 若是字串，例如 "2026-05-10T16:00:00.000Z"
+    var s = String(val);
+    return s.slice(0, 10); // 取前 10 碼 "2026-05-10"
+}
+
+
+function loadRecords(){
+    var data = localStorage.getItem(LS_KEY);
+    if (!data) return [];
+    try {
+        return JSON.parse(data);
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
+}
+
+// 寫入 localStorage + 雲端（整批覆蓋）
+function saveRecords(records){
+    // 先存本機，保持原本功能
+    localStorage.setItem(LS_KEY, JSON.stringify(records));
+
+    // 再同步到雲端（整批覆蓋）
+    try {
+        fetch(API_URL, {
+            method: "POST",
+            // 不設 Content-Type，讓瀏覽器用簡單請求 (text/plain)
+            body: JSON.stringify({
+                action: "saveAll",
+                records: records
+            })
+        }).then(function(res){
+            // Web App 回傳 JSON，我們一樣照常 parse
+            return res.json();
+        }).then(function(json){
+            // console.log("saveAll result:", json);
+        }).catch(function(err){
+            console.log("saveAll error:", err);
+        });
+    } catch (e) {
+        console.log("saveAll exception:", e);
+    }
+}
+// 從雲端讀取最新資料，寫入 localStorage，然後畫表格
+function syncFromCloud(){
+    try {
+        fetch(API_URL + "?action=list", {
+            method: "GET"
+        }).then(function(res){
+            return res.json();
+        }).then(function(json){
+            if (!json || !json.records) {
+                console.log("list: unexpected response", json);
+                renderTable(); // 沒拿到也至少畫目前 localStorage 的資料
+                return;
+            }
+            // 雲端回來的是物件陣列，直接存進 localStorage
+            localStorage.setItem(LS_KEY, JSON.stringify(json.records));
+            renderTable();
+        }).catch(function(err){
+            console.log("list error:", err);
+            // 雲端壞掉時，就用本機現有資料
+            renderTable();
+        });
+    } catch (e) {
+        console.log("list exception:", e);
+        renderTable();
+    }
+}
+
+
+function renderTable(){
+    var records = loadRecords();
+
+    // 依日期由舊到新排序（input type="date" 為 yyyy-mm-dd，字串排序即可）
+    records.sort(function (a, b) {
+        if (!a.date) return -1;
+        if (!b.date) return 1;
+        if (a.date < b.date) return -1;
+        if (a.date > b.date) return 1;
+        return 0;
+    });
+
+    var wrapper = document.getElementById("tableWrapper");
+    var tbody = document.querySelector("#recordsTable tbody");
+
+        tbody.innerHTML = "";
+        if(records.length === 0){
+            wrapper.style.display = "none";
+            return;
+        }
+        wrapper.style.display = "block";
+        for (var i = 0; i < records.length; i++) {
+            var rec = records[i];
+            var tr = document.createElement("tr");
+
+            function td(text){
+                var c = document.createElement("td");
+                c.textContent = text || "";
+                return c;
+            }
+
+            tr.appendChild(td(toDateOnly(rec.date)));
+            tr.appendChild(td(rec.steps));
+            tr.appendChild(td(rec.pain));
+            tr.appendChild(td(rec.swelling));
+            tr.appendChild(td(rec.walkMinutes));
+            tr.appendChild(td(rec.standMinutes));
+            tr.appendChild(td(
+                "上:" + (rec.upStairs || "") +
+                " / 下:" + (rec.downStairs || "") +
+                " / 蹲:" + (rec.squat || "") +
+                " / 扭:" + (rec.ankleTwist || "") +
+                " / 單腳:" + (rec.singleLeg || "") +
+                " / 開車:" + (rec.drive || "")
+            ));
+
+            var rehabText = (rec.rehab && rec.rehab.length) ? rec.rehab.join("、") : "";
+            tr.appendChild(td(rehabText));
+
+            var careDisplay = (rec.care && rec.care.length) ? rec.care.join("、") : "";
+            if (rec.careOtherText) {
+                if (careDisplay) {
+                    careDisplay = careDisplay + "、其他：" + rec.careOtherText;
+                } else {
+                    careDisplay = "其他：" + rec.careOtherText;
+                }
+            }
+            tr.appendChild(td(careDisplay));
+
+            var assistText = (rec.assist && rec.assist.length) ? rec.assist.join("、") : "";
+            tr.appendChild(td(assistText));
+
+            var limitText = (rec.limit && rec.limit.length) ? rec.limit.join("、") : "";
+            tr.appendChild(td(limitText));
+
+       tr.appendChild(td(rec.careNeed));
+tr.appendChild(td(rec.expense));
+tr.appendChild(td(rec.note));
+
+// 操作欄：載入 / 刪除
+var opTd = document.createElement("td");
+
+var editBtn = document.createElement("button");
+editBtn.textContent = "載入";
+editBtn.type = "button";
+editBtn.className = "edit-record-btn";
+editBtn.setAttribute("data-date", rec.date);
+opTd.appendChild(editBtn);
+
+var delBtn = document.createElement("button");
+delBtn.textContent = "刪除";
+delBtn.type = "button";
+delBtn.className = "delete-record-btn";
+delBtn.style.marginLeft = "6px";
+delBtn.setAttribute("data-date", rec.date);
+opTd.appendChild(delBtn);
+
+tr.appendChild(opTd);
+
+            tbody.appendChild(tr);
+        }
+    }
+
+function fillFormFromRecord(rec) {
+    document.getElementById("date").value = toDateOnly(rec.date);
+    document.getElementById("steps").value = rec.steps || "";
+    document.getElementById("pain").value = rec.pain || "";
+    document.getElementById("swelling").value = rec.swelling || "";
+    document.getElementById("walkMinutes").value = rec.walkMinutes || "";
+    document.getElementById("standMinutes").value = rec.standMinutes || "";
+    document.getElementById("upStairs").value = rec.upStairs || "";
+    document.getElementById("downStairs").value = rec.downStairs || "";
+    document.getElementById("squat").value = rec.squat || "";
+    document.getElementById("ankleTwist").value = rec.ankleTwist || "";
+    document.getElementById("singleLeg").value = rec.singleLeg || "";
+    document.getElementById("drive").value = rec.drive || "";
+    document.getElementById("careNeed").value = rec.careNeed || "";
+    document.getElementById("expense").value = rec.expense || "";
+    document.getElementById("note").value = rec.note || "";
+    document.getElementById("careOtherText").value = rec.careOtherText || "";
+    document.getElementById("careOtherChk").checked = !!rec.careOtherText;
+
+    // 勾選複選框：rehab / care / assist / limit
+    function setChecks(name, values) {
+        var nodes = document.querySelectorAll('input[name="' + name + '"]');
+        var set = {};
+        if (values && values.length) {
+            for (var i = 0; i < values.length; i++) set[values[i]] = true;
+        }
+        for (var j = 0; j < nodes.length; j++) {
+            var v = nodes[j].value;
+            nodes[j].checked = !!set[v];
+        }
+    }
+    setChecks("rehab", rec.rehab || []);
+    setChecks("care", rec.care || []);
+    setChecks("assist", rec.assist || []);
+    setChecks("limit", rec.limit || []);
+}
+
+// 監聽表格裡的「載入 / 刪除」按鈕
+var tableBody = document.querySelector("#recordsTable tbody");
+tableBody.addEventListener("click", function (e) {
+    var target = e.target || e.srcElement;
+
+    // 載入該日紀錄進表單
+    if (target.classList.contains("edit-record-btn")) {
+        var d = target.getAttribute("data-date");
+        var records = loadRecords();
+        for (var i = 0; i < records.length; i++) {
+            if (records[i].date === d) {
+                fillFormFromRecord(records[i]);
+                alert("已載入 " + d + " 的紀錄，可在上方修改後按「新增今日紀錄」覆蓋。");
+                break;
+            }
+        }
+        return;
+    }
+
+    // 刪除此日紀錄
+    if (target.classList.contains("delete-record-btn")) {
+        var dd = target.getAttribute("data-date");
+        var ok = window.confirm("是否確定要刪除 " + dd + " 的紀錄？此動作無法復原。");
+        if (!ok) return;
+        var recs = loadRecords();
+        var newRecs = [];
+        for (var j = 0; j < recs.length; j++) {
+            if (recs[j].date !== dd) {
+                newRecs.push(recs[j]);
+            }
+        }
+        saveRecords(newRecs);
+        renderTable();
+        alert("已刪除 " + dd + " 的紀錄");
+    }
+});
+
+
+    var addBtn = document.getElementById("addRecordBtn");
+    var exportBtn = document.getElementById("exportCsvBtn");
+    var clearBtn = document.getElementById("clearAllBtn");
+
+    // 1. 新增今日紀錄
+    addBtn.addEventListener("click", function(){
+        var date = document.getElementById("date").value;
+        if(!date){
+            alert("請先選擇日期");
+            return;
+        }
+        var careOtherChk = document.getElementById("careOtherChk").checked;
+        var careOtherText = document.getElementById("careOtherText").value.replace(/^\s+|\s+$/g, "");
+
+        var rec = {
+            date: date,
+            steps: document.getElementById("steps").value || "",
+            pain: document.getElementById("pain").value || "",
+            swelling: document.getElementById("swelling").value || "",
+            walkMinutes: document.getElementById("walkMinutes").value || "",
+            standMinutes: document.getElementById("standMinutes").value || "",
+            upStairs: document.getElementById("upStairs").value || "",
+            downStairs: document.getElementById("downStairs").value || "",
+            squat: document.getElementById("squat").value || "",
+            ankleTwist: document.getElementById("ankleTwist").value || "",
+            singleLeg: document.getElementById("singleLeg").value || "",
+            drive: document.getElementById("drive").value || "",
+            rehab: getCheckedValues("rehab"),
+            care: getCheckedValues("care"),
+            assist: getCheckedValues("assist"),
+            limit: getCheckedValues("limit"),
+            careNeed: document.getElementById("careNeed").value || "",
+            expense: document.getElementById("expense").value || "",
+            note: document.getElementById("note").value || "",
+            careOtherText: (careOtherChk && careOtherText) ? careOtherText : ""
+        };
+
+        var records = loadRecords();
+        var idx = -1;
+        for (var i = 0; i < records.length; i++) {
+            if (records[i].date === rec.date) {
+                idx = i;
+                break;
+            }
+        }
+        if(idx >= 0){
+            records[idx] = rec;
+        }else{
+            records.push(rec);
+        }
+        saveRecords(records);
+        renderTable();
+
+        alert("已成功紀錄");
+        document.getElementById("recordForm").reset();
+    });
+
+    // 2. 匯出 CSV
+exportBtn.addEventListener("click", function(){
+    var records = loadRecords();
+
+    // 匯出時同樣依日期由舊到新排序
+    records.sort(function (a, b) {
+        if (!a.date) return -1;
+        if (!b.date) return 1;
+        if (a.date < b.date) return -1;
+        if (a.date > b.date) return 1;
+        return 0;
+    });
+
+        var headers = [
+            "日期","今日步數","疼痛程度","腫脹程度",
+            "連續走路多久開始痛(分鐘)","連續站立多久開始痛(分鐘)",
+            "上樓梯","下樓梯","蹲下","腳踝扭轉","單腳站立","開車（功能）",
+            "復健與治療","處置","輔具","功能受限",
+            "其他照護需求","今日支出","備註"
+        ];
+        var rows = [headers];
+
+        for (var i = 0; i < records.length; i++) {
+            var r = records[i];
+            var careDisplay = (r.care && r.care.length) ? r.care.join("、") : "";
+            if(r.careOtherText){
+                if(careDisplay){
+                    careDisplay = careDisplay + "、其他：" + r.careOtherText;
+                } else {
+                    careDisplay = "其他：" + r.careOtherText;
+                }
+            }
+            var rehabText = (r.rehab && r.rehab.length) ? r.rehab.join("、") : "";
+            var assistText = (r.assist && r.assist.length) ? r.assist.join("、") : "";
+            var limitText = (r.limit && r.limit.length) ? r.limit.join("、") : "";
+
+            rows.push([
+                r.date || "",
+                r.steps || "",
+                r.pain || "",
+                r.swelling || "",
+                r.walkMinutes || "",
+                r.standMinutes || "",
+                r.upStairs || "",
+                r.downStairs || "",
+                r.squat || "",
+                r.ankleTwist || "",
+                r.singleLeg || "",
+                r.drive || "",
+                rehabText,
+                careDisplay,
+                assistText,
+                limitText,
+                r.careNeed || "",
+                r.expense || "",
+                r.note || ""
+            ]);
+        }
+
+        var csv = "";
+        for (var rIdx = 0; rIdx < rows.length; rIdx++) {
+            var row = rows[rIdx];
+            var fields = [];
+            for (var fIdx = 0; fIdx < row.length; fIdx++) {
+                var field = row[fIdx];
+                if (field == null) field = "";
+                field = String(field);
+                if (field.indexOf(",") !== -1 || field.indexOf('"') !== -1 || field.indexOf("\n") !== -1) {
+                    field = '"' + field.replace(/"/g,'""') + '"';
+                }
+                fields.push(field);
+            }
+            csv += fields.join(",") + "\n";
+        }
+
+        var blob = new Blob(
+            ["\uFEFF" + csv],  // 加 BOM，Excel 不會亂碼
+            {type: "text/csv;charset=utf-8;"}
+        );
+
+        var url = URL.createObjectURL(blob);
+        var today = new Date().toISOString().slice(0,10);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "ankle_treatment_" + today + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert("已匯出 CSV");
+    });
+
+    // 3. 清除本機所有紀錄
+    clearBtn.addEventListener("click", function(){
+        var ok = window.confirm("是否確定要清除本機所有紀錄？此動作無法復原。");
+        if (!ok) return;
+        localStorage.removeItem(LS_KEY);
+        renderTable();
+        alert("已清除本機所有紀錄");
+    });
+
+    // 進入頁面時，先從雲端抓最新資料，再畫表格
+    syncFromCloud();
+});
+</script>
