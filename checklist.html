@@ -393,6 +393,7 @@
         <div class="btn-row">
             <button type="button" class="btn-primary" id="addRecordBtn">新增今日紀錄</button>
             <button type="button" class="btn-secondary" id="exportCsvBtn">匯出 CSV</button>
+            <button type="button" class="btn-secondary" id="refreshCloudBtn">從雲端重新載入</button>
             <button type="button" class="btn-danger" id="clearAllBtn">清除本機所有紀錄</button>
         </div>
     </form>
@@ -819,9 +820,18 @@ tableBody.addEventListener("click", function (e) {
         dateInput.value = getTodayDateString();
     }
 
-    var addBtn = document.getElementById("addRecordBtn");
-    var exportBtn = document.getElementById("exportCsvBtn");
-    var clearBtn = document.getElementById("clearAllBtn");
+var addBtn = document.getElementById("addRecordBtn");
+var exportBtn = document.getElementById("exportCsvBtn");
+    // 從雲端重新載入（不送資料上去，只覆蓋本機）
+refreshBtn.addEventListener("click", function(){
+    var ok = window.confirm("這會捨棄目前尚未儲存的修改，從雲端重新載入資料。確定要繼續？");
+    if (!ok) return;
+    syncFromCloud();
+});
+
+var refreshBtn = document.getElementById("refreshCloudBtn");
+var clearBtn = document.getElementById("clearAllBtn");
+
 
     // 1. 新增今日紀錄
     addBtn.addEventListener("click", function(){
