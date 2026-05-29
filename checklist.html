@@ -140,6 +140,7 @@
             top:0;
             z-index:1;
         }
+        
 .stats-bar {
     display: flex;
     flex-wrap: wrap;
@@ -150,7 +151,15 @@
     margin-top: 10px;
     margin-bottom: 5px;
 }
-
+.stats-summary {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 8px;
+}
+.stats-summary div {
+    margin-bottom: 2px;
+}
+        
 .stats-bar span {
     margin-right: 10px;
 }
@@ -392,6 +401,12 @@
     <span id="lastSync" class="last-sync">最後同步時間：-</span>
 </div>
 
+    <div id="statsSummary" class="stats-summary">
+    <div>最近 7 天平均步數：<span id="avgSteps">-</span></div>
+    <div>最近 7 天平均疼痛：<span id="avgPain">-</span>，腫脹：<span id="avgSwelling">-</span></div>
+    <div>最痛的日期（疼痛分數）：<span id="topPainDays">-</span></div>
+</div>
+    
     <div class="table-wrapper" id="tableWrapper" style="display:none;">
         <table class="records-table" id="recordsTable">
 <thead>
@@ -797,13 +812,14 @@ exportBtn.addEventListener("click", function(){
         return 0;
     });
 
-        var headers = [
-            "日期","今日步數","疼痛程度","腫脹程度",
-            "連續走路多久開始痛(分鐘)","連續站立多久開始痛(分鐘)",
-            "上樓梯","下樓梯","蹲下","腳踝扭轉","單腳站立","開車（功能）",
-            "復健與治療","處置","輔具","功能受限",
-            "其他照護需求","今日支出","備註"
-        ];
+var headers = [
+    "日期","今日步數","疼痛程度","腫脹程度","總負擔指數",
+    "連續走路多久開始痛(分鐘)","連續站立多久開始痛(分鐘)",
+    "上樓梯","下樓梯","蹲下","腳踝扭轉","單腳站立","開車（功能）",
+    "復健與治療","處置","輔具","功能受限",
+    "其他照護需求","今日支出","備註"
+];
+
         var rows = [headers];
 
         for (var i = 0; i < records.length; i++) {
@@ -820,27 +836,34 @@ exportBtn.addEventListener("click", function(){
             var assistText = (r.assist && r.assist.length) ? r.assist.join("、") : "";
             var limitText = (r.limit && r.limit.length) ? r.limit.join("、") : "";
 
+            var painNum = Number(r.pain);
+            var swellNum = Number(r.swelling);
+            var burden = 0;
+            if (!isNaN(painNum)) burden += painNum;
+            if (!isNaN(swellNum)) burden += swellNum;
+            
             rows.push([
-                r.date || "",
-                r.steps || "",
-                r.pain || "",
-                r.swelling || "",
-                (r.walkMinutes === 0 ? "0" : (r.walkMinutes || "")),
-                (r.standMinutes === 0 ? "0" : (r.standMinutes || "")),
-                r.upStairs || "",
-                r.downStairs || "",
-                r.squat || "",
-                r.ankleTwist || "",
-                r.singleLeg || "",
-                r.drive || "",
-                rehabText,
-                careDisplay,
-                assistText,
-                limitText,
-                r.careNeed || "",
-                r.expense || "",
-                r.note || ""
-            ]);
+    r.date || "",
+    r.steps || "",
+    r.pain || "",
+    r.swelling || "",
+    burden ? String(burden) : "",   // 總負擔指數
+    (r.walkMinutes === 0 ? "0" : (r.walkMinutes || "")),
+    (r.standMinutes === 0 ? "0" : (r.standMinutes || "")),
+    r.upStairs || "",
+    r.downStairs || "",
+    r.squat || "",
+    r.ankleTwist || "",
+    r.singleLeg || "",
+    r.drive || "",
+    rehabText,
+    careDisplay,
+    assistText,
+    limitText,
+    r.careNeed || "",
+    r.expense || "",
+    r.note || ""
+]);
         }
 
         var csv = "";
@@ -874,7 +897,8 @@ exportBtn.addEventListener("click", function(){
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        alert("已匯出 CSV");
+alert("已匯出 CSV。\n建議將此檔案備份到雲端或寄給自己，作為後續醫療／法律證據。");
+
     });
 
     // 3. 清除本機所有紀錄
