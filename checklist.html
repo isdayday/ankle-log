@@ -28,6 +28,40 @@
             margin-bottom:15px;
             background:#fafafa;
         }
+.function-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.function-table td {
+    padding: 4px 6px;
+    vertical-align: middle;
+}
+
+.function-label {
+    width: 40%;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.function-select {
+    width: 60%;
+}
+
+/* 桌機：兩欄（2 column grid，每欄一個「功能＋下拉」的小表格） */
+.function-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 20px;
+}
+
+/* 手機：改成一欄 */
+@media (max-width: 600px){
+    .function-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
         .section h2 {
             margin:0 0 10px;
             font-size:1.1rem;
@@ -106,6 +140,31 @@
             top:0;
             z-index:1;
         }
+.stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.stats-bar span {
+    margin-right: 10px;
+}
+
+.stats-bar .last-sync {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+/* 高疼痛 / 高腫脹列標示 */
+.row-high-pain {
+    background-color: #ffe5e5; /* 淡紅 */
+}
+
         .table-wrapper {
             max-height:260px;
             overflow:auto;
@@ -167,52 +226,86 @@
         <!-- 二、功能表現 -->
         <div class="section">
             <h2>二、功能表現</h2>
-            <div class="field-row">
-                <div class="field">
-                    <label for="upStairs">1. 上樓梯</label>
-                    <select id="upStairs">
-                        <option value="">請選擇</option>
-                        <option>正常</option><option>微痛</option><option>痛</option><option>需扶手</option><option>無法</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="downStairs">2. 下樓梯</label>
-                    <select id="downStairs">
-                        <option value="">請選擇</option>
-                        <option>正常</option><option>微痛</option><option>痛</option><option>需扶手</option><option>無法</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="squat">3. 蹲下</label>
-                    <select id="squat">
-                        <option value="">請選擇</option>
-                        <option>正常</option><option>微痛</option><option>痛</option><option>無法</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="ankleTwist">4. 腳踝扭轉</label>
-                    <select id="ankleTwist">
-                        <option value="">請選擇</option>
-                        <option>正常</option><option>微痛</option><option>痛</option><option>無法</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="singleLeg">5. 單腳站立</label>
-                    <select id="singleLeg">
-                        <option value="">請選擇</option>
-                        <option>可</option><option>困難</option><option>無法</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="drive">6. 開車</label>
-                    <select id="drive">
-                        <option value="">請選擇</option>
-                        <option>可</option>
-                        <option>疼痛</option>
-                        <option>困難</option>
-                        <option>無法</option>
-                    </select>
-                </div>
+
+            <div class="function-grid">
+                <table class="function-table">
+                    <tr>
+                        <td class="function-label"><label for="upStairs">1. 上樓梯</label></td>
+                        <td class="function-select">
+                            <select id="upStairs">
+                                <option value="">請選擇</option>
+                                <option>正常</option>
+                                <option>微痛</option>
+                                <option>痛</option>
+                                <option>需扶手</option>
+                                <option>無法</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="function-label"><label for="downStairs">2. 下樓梯</label></td>
+                        <td class="function-select">
+                            <select id="downStairs">
+                                <option value="">請選擇</option>
+                                <option>正常</option>
+                                <option>微痛</option>
+                                <option>痛</option>
+                                <option>需扶手</option>
+                                <option>無法</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="function-label"><label for="squat">3. 蹲下</label></td>
+                        <td class="function-select">
+                            <select id="squat">
+                                <option value="">請選擇</option>
+                                <option>正常</option>
+                                <option>微痛</option>
+                                <option>痛</option>
+                                <option>無法</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="function-table">
+                    <tr>
+                        <td class="function-label"><label for="ankleTwist">4. 腳踝扭轉</label></td>
+                        <td class="function-select">
+                            <select id="ankleTwist">
+                                <option value="">請選擇</option>
+                                <option>正常</option>
+                                <option>微痛</option>
+                                <option>痛</option>
+                                <option>無法</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="function-label"><label for="singleLeg">5. 單腳站立</label></td>
+                        <td class="function-select">
+                            <select id="singleLeg">
+                                <option value="">請選擇</option>
+                                <option>可</option>
+                                <option>困難</option>
+                                <option>無法</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="function-label"><label for="drive">6. 開車</label></td>
+                        <td class="function-select">
+                            <select id="drive">
+                                <option value="">請選擇</option>
+                                <option>可</option>
+                                <option>疼痛</option>
+                                <option>困難</option>
+                                <option>無法</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
 
@@ -294,28 +387,37 @@
             <button type="button" class="btn-danger" id="clearAllBtn">清除本機所有紀錄</button>
         </div>
     </form>
+<div class="stats-bar">
+    <span id="recordCount">目前共 0 天紀錄</span>
+    <span id="lastSync" class="last-sync">最後同步時間：-</span>
+</div>
 
     <div class="table-wrapper" id="tableWrapper" style="display:none;">
         <table class="records-table" id="recordsTable">
-            <thead>
-            <tr>
-                <th>日期</th>
-                <th>步數</th>
-                <th>疼痛</th>
-                <th>腫脹</th>
-                <th>走多久痛</th>
-                <th>站多久痛</th>
-                <th>功能表現</th>
-                <th>復健與治療</th>
-                <th>處置</th>
-                <th>輔具</th>
-                <th>功能受限</th>
-                <th>其他照護需求</th>
-                <th>今日支出</th>
-                <th>備註</th>
-                <th>操作</th>
-            </tr>
-            </thead>
+<thead>
+<tr>
+    <th>日期</th>
+    <th>步數</th>
+    <th>疼痛</th>
+    <th>腫脹</th>
+    <th>走多久痛</th>
+    <th>站多久痛</th>
+    <th>上樓梯</th>
+    <th>下樓梯</th>
+    <th>蹲下</th>
+    <th>腳踝扭轉</th>
+    <th>單腳站立</th>
+    <th>開車</th>
+    <th>復健與治療</th>
+    <th>處置</th>
+    <th>輔具</th>
+    <th>功能受限</th>
+    <th>其他照護需求</th>
+    <th>今日支出</th>
+    <th>備註</th>
+    <th>操作</th>
+</tr>
+</thead>
             <tbody></tbody>
         </table>
     </div>
@@ -326,6 +428,23 @@ window.addEventListener('load', function () {
     var LS_KEY = "ankle_treatment_records_v6";
     var API_URL = "https://script.google.com/macros/s/AKfycbxNHFOTnED1lP-OBnF5g6aVXUDkEP8o6js4QxOa0xoTbbhC6mRW2zdhofRD7lDaxeHCrA/exec";
 
+    function getTodayDateString() {
+        var d = new Date();
+        return d.toISOString().slice(0, 10); // yyyy-mm-dd
+    }
+
+    // 把 ISO 字串 / Date 物件轉成 yyyy-mm-dd
+    function toDateOnly(val) {
+        if (!val) return "";
+        if (Object.prototype.toString.call(val) === "[object Date]") {
+            var y = val.getFullYear();
+            var m = ("0" + (val.getMonth() + 1)).slice(-2);
+            var d = ("0" + val.getDate()).slice(-2);
+            return y + "-" + m + "-" + d;
+        }
+        var s = String(val);
+        return s.slice(0, 10); 
+    }
 
     function getCheckedValues(name){
         var nodes = document.querySelectorAll('input[name="' + name + '"]:checked');
@@ -335,33 +454,6 @@ window.addEventListener('load', function () {
         }
         return result;
     }
-
-// 從 localStorage 讀（同步用）
-// 真正資料來源會在 syncFromCloud() 時從雲端覆寫
-
-function getCheckedValues(name){
-    var nodes = document.querySelectorAll('input[name="' + name + '"]:checked');
-    var result = [];
-    for (var i = 0; i < nodes.length; i++) {
-        result.push(nodes[i].value);
-    }
-    return result;
-}
-
-// 把 ISO 字串 / Date 物件轉成 yyyy-mm-dd
-function toDateOnly(val) {
-    if (!val) return "";
-    // 若是 Date 物件
-    if (Object.prototype.toString.call(val) === "[object Date]") {
-        var y = val.getFullYear();
-        var m = ("0" + (val.getMonth() + 1)).slice(-2);
-        var d = ("0" + val.getDate()).slice(-2);
-        return y + "-" + m + "-" + d;
-    }
-    // 若是字串，例如 "2026-05-10T16:00:00.000Z"
-    var s = String(val);
-    return s.slice(0, 10); // 取前 10 碼 "2026-05-10"
-}
 
 
 function loadRecords(){
@@ -401,7 +493,7 @@ function saveRecords(records){
         console.log("saveAll exception:", e);
     }
 }
-// 從雲端讀取最新資料，寫入 localStorage，然後畫表格
+// 從雲端讀取最新資料，寫入 localStorage，然後畫表格＋更新最後同步時間
 function syncFromCloud(){
     try {
         fetch(API_URL + "?action=list", {
@@ -414,8 +506,22 @@ function syncFromCloud(){
                 renderTable(); // 沒拿到也至少畫目前 localStorage 的資料
                 return;
             }
+
             // 雲端回來的是物件陣列，直接存進 localStorage
             localStorage.setItem(LS_KEY, JSON.stringify(json.records));
+
+            // 更新最後同步時間（顯示在畫面上）
+            var now = new Date();
+            var ts = now.getFullYear() + "-" +
+                     ("0" + (now.getMonth()+1)).slice(-2) + "-" +
+                     ("0" + now.getDate()).slice(-2) + " " +
+                     ("0" + now.getHours()).slice(-2) + ":" +
+                     ("0" + now.getMinutes()).slice(-2);
+            var lastSyncEl = document.getElementById("lastSync");
+            if (lastSyncEl) {
+                lastSyncEl.textContent = "最後同步時間：" + ts;
+            }
+
             renderTable();
         }).catch(function(err){
             console.log("list error:", err);
@@ -432,7 +538,6 @@ function syncFromCloud(){
 function renderTable(){
     var records = loadRecords();
 
-    // 依日期由舊到新排序（input type="date" 為 yyyy-mm-dd，字串排序即可）
     records.sort(function (a, b) {
         if (!a.date) return -1;
         if (!b.date) return 1;
@@ -444,91 +549,112 @@ function renderTable(){
     var wrapper = document.getElementById("tableWrapper");
     var tbody = document.querySelector("#recordsTable tbody");
 
-        tbody.innerHTML = "";
-        if(records.length === 0){
-            wrapper.style.display = "none";
-            return;
+    var countEl = document.getElementById("recordCount");
+    if (countEl) {
+        countEl.textContent = "目前共 " + records.length + " 天紀錄";
+    }
+
+    tbody.innerHTML = "";
+    if(records.length === 0){
+        wrapper.style.display = "none";
+        return;
+    }
+    wrapper.style.display = "block";
+
+    for (var i = 0; i < records.length; i++) {
+        var rec = records[i];
+        var tr = document.createElement("tr");
+
+        var painNum = Number(rec.pain);
+        var swellNum = Number(rec.swelling);
+        if (painNum >= 8 || swellNum >= 8) {
+            tr.classList.add("row-high-pain");
         }
-        wrapper.style.display = "block";
-        for (var i = 0; i < records.length; i++) {
-            var rec = records[i];
-            var tr = document.createElement("tr");
 
-            function td(text){
-                var c = document.createElement("td");
-                c.textContent = text || "";
-                return c;
-            }
+        function td(text){
+            var c = document.createElement("td");
+            c.textContent = text || "";
+            return c;
+        }
 
-            tr.appendChild(td(toDateOnly(rec.date)));
-            tr.appendChild(td(rec.steps));
-            tr.appendChild(td(rec.pain));
-            tr.appendChild(td(rec.swelling));
-            tr.appendChild(td(rec.walkMinutes));
-            tr.appendChild(td(rec.standMinutes));
-            tr.appendChild(td(
-                "上:" + (rec.upStairs || "") +
-                " / 下:" + (rec.downStairs || "") +
-                " / 蹲:" + (rec.squat || "") +
-                " / 扭:" + (rec.ankleTwist || "") +
-                " / 單腳:" + (rec.singleLeg || "") +
-                " / 開車:" + (rec.drive || "")
-            ));
+    // 1–6 基本狀態
+    tr.appendChild(td(toDateOnly(rec.date)));   // 日期
+    tr.appendChild(td(rec.steps));              // 步數
+    tr.appendChild(td(rec.pain));               // 疼痛
+    tr.appendChild(td(rec.swelling));           // 腫脹
+    tr.appendChild(td(rec.walkMinutes));        // 走多久痛
+    tr.appendChild(td(rec.standMinutes));       // 站多久痛
 
-            var rehabText = (rec.rehab && rec.rehab.length) ? rec.rehab.join("、") : "";
-            tr.appendChild(td(rehabText));
+    // 7–12 功能表現：六欄
+    tr.appendChild(td(rec.upStairs || ""));     // 上樓梯
+    tr.appendChild(td(rec.downStairs || ""));   // 下樓梯
+    tr.appendChild(td(rec.squat || ""));        // 蹲下
+    tr.appendChild(td(rec.ankleTwist || ""));   // 腳踝扭轉
+    tr.appendChild(td(rec.singleLeg || ""));    // 單腳站立
+    tr.appendChild(td(rec.drive || ""));        // 開車
 
-            var careDisplay = (rec.care && rec.care.length) ? rec.care.join("、") : "";
-            if (rec.careOtherText) {
-                if (careDisplay) {
-                    careDisplay = careDisplay + "、其他：" + rec.careOtherText;
-                } else {
-                    careDisplay = "其他：" + rec.careOtherText;
-                }
-            }
-            tr.appendChild(td(careDisplay));
+    // 13 復健與治療
+    var rehabText = (rec.rehab && rec.rehab.length) ? rec.rehab.join("、") : "";
+    tr.appendChild(td(rehabText));
 
-            var assistText = (rec.assist && rec.assist.length) ? rec.assist.join("、") : "";
-            tr.appendChild(td(assistText));
-
-            var limitText = (rec.limit && rec.limit.length) ? rec.limit.join("、") : "";
-            tr.appendChild(td(limitText));
-
-       tr.appendChild(td(rec.careNeed));
-tr.appendChild(td(rec.expense));
-tr.appendChild(td(rec.note));
-
-// 操作欄：載入 / 刪除
-var opTd = document.createElement("td");
-
-var editBtn = document.createElement("button");
-editBtn.textContent = "載入";
-editBtn.type = "button";
-editBtn.className = "edit-record-btn";
-editBtn.setAttribute("data-date", rec.date);
-opTd.appendChild(editBtn);
-
-var delBtn = document.createElement("button");
-delBtn.textContent = "刪除";
-delBtn.type = "button";
-delBtn.className = "delete-record-btn";
-delBtn.style.marginLeft = "6px";
-delBtn.setAttribute("data-date", rec.date);
-opTd.appendChild(delBtn);
-
-tr.appendChild(opTd);
-
-            tbody.appendChild(tr);
+    // 14 處置（含其他）
+    var careDisplay = (rec.care && rec.care.length) ? rec.care.join("、") : "";
+    if (rec.careOtherText) {
+        if (careDisplay) {
+            careDisplay = careDisplay + "、其他：" + rec.careOtherText;
+        } else {
+            careDisplay = "其他：" + rec.careOtherText;
         }
     }
+    tr.appendChild(td(careDisplay));
+
+    // 15 輔具
+    var assistText = (rec.assist && rec.assist.length) ? rec.assist.join("、") : "";
+    tr.appendChild(td(assistText));
+
+    // 16 功能受限
+    var limitText = (rec.limit && rec.limit.length) ? rec.limit.join("、") : "";
+    tr.appendChild(td(limitText));
+
+    // 17–19 其他照護需求 / 支出 / 備註
+    tr.appendChild(td(rec.careNeed));
+    tr.appendChild(td(rec.expense));
+    tr.appendChild(td(rec.note));
+
+    // 20 操作欄：載入 / 刪除
+    var opTd = document.createElement("td");
+
+    var editBtn = document.createElement("button");
+    editBtn.textContent = "載入";
+    editBtn.type = "button";
+    editBtn.className = "edit-record-btn";
+    editBtn.setAttribute("data-date", rec.date);
+    opTd.appendChild(editBtn);
+
+    var delBtn = document.createElement("button");
+    delBtn.textContent = "刪除";
+    delBtn.type = "button";
+    delBtn.className = "delete-record-btn";
+    delBtn.style.marginLeft = "6px";
+    delBtn.setAttribute("data-date", rec.date);
+    opTd.appendChild(delBtn);
+
+    tr.appendChild(opTd);
+
+    tbody.appendChild(tr);
+}
+}
+}
 
 function fillFormFromRecord(rec) {
     document.getElementById("date").value = toDateOnly(rec.date);
     document.getElementById("steps").value = rec.steps || "";
     document.getElementById("pain").value = rec.pain || "";
     document.getElementById("swelling").value = rec.swelling || "";
-    document.getElementById("walkMinutes").value = rec.walkMinutes || "";
-    document.getElementById("standMinutes").value = rec.standMinutes || "";
+   document.getElementById("walkMinutes").value =
+    (rec.walkMinutes === 0 ? "0" : (rec.walkMinutes || ""));
+document.getElementById("standMinutes").value =
+    (rec.standMinutes === 0 ? "0" : (rec.standMinutes || ""));
     document.getElementById("upStairs").value = rec.upStairs || "";
     document.getElementById("downStairs").value = rec.downStairs || "";
     document.getElementById("squat").value = rec.squat || "";
@@ -596,6 +722,11 @@ tableBody.addEventListener("click", function (e) {
     }
 });
 
+    // 初始時自動帶入今天日期（若尚未有值）
+    var dateInput = document.getElementById("date");
+    if (dateInput && !dateInput.value) {
+        dateInput.value = getTodayDateString();
+    }
 
     var addBtn = document.getElementById("addRecordBtn");
     var exportBtn = document.getElementById("exportCsvBtn");
@@ -695,8 +826,8 @@ exportBtn.addEventListener("click", function(){
                 r.steps || "",
                 r.pain || "",
                 r.swelling || "",
-                r.walkMinutes || "",
-                r.standMinutes || "",
+                (r.walkMinutes === 0 ? "0" : (r.walkMinutes || "")),
+                (r.standMinutes === 0 ? "0" : (r.standMinutes || "")),
                 r.upStairs || "",
                 r.downStairs || "",
                 r.squat || "",
