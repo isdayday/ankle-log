@@ -553,6 +553,7 @@ function syncFromCloud(){
 function renderTable(){
     var records = loadRecords();
 
+    // 依日期由舊到新排序
     records.sort(function (a, b) {
         if (!a.date) return -1;
         if (!b.date) return 1;
@@ -564,20 +565,95 @@ function renderTable(){
     var wrapper = document.getElementById("tableWrapper");
     var tbody = document.querySelector("#recordsTable tbody");
 
+    // 紀錄數
     var countEl = document.getElementById("recordCount");
     if (countEl) {
         countEl.textContent = "目前共 " + records.length + " 天紀錄";
     }
 
-    tbody.innerHTML = "";
-    if(records.length === 0){
+    // 統計區（最近 7 天平均 & 最痛日期）
+    var avgStepsEl = document.getElementById("avgSteps");
+    var avgPainEl = document.getElementById("avgPain");
+    var avgSwellingEl = document.getElementById("avgSwelling");
+    var topPainDaysEl = document.getElementById("topPainDays");
+
+    if (records.length === 0) {
+        if (avgStepsEl) avgStepsEl.textContent = "-";
+        if (avgPainEl) avgPainEl.textContent = "-";
+        if (avgSwellingEl) avgSwellingEl.textContent = "-";
+        if (topPainDaysEl) topPainDaysEl.textContent = "-";
         wrapper.style.display = "none";
+        tbody.innerHTML = "";
         return;
     }
+
+    // 最近 7 天（已排序，由舊到新，所以取最後 7 筆）
+    var recent = records.slice(Math.max(0, records.length - 7));
+    var sumSteps = 0, cntSteps = 0;
+    var sumPain = 0, cntPain = 0;
+    var sumSwelling = 0, cntSwelling = 0;
+    var maxPain = -1;
+
+    for (var i = 0; i < recent.length; i++) {
+        var r = recent[i];
+        var stepsNum = Number(r.steps);
+        if (!isNaN(stepsNum)) {
+            sumSteps += stepsNum;
+            cntSteps++;
+        }
+        var pNum = Number(r.pain);
+        if (!isNaN(pNum)) {
+            sumPain += pNum;
+            cntPain++;
+        }
+        var sNum = Number(r.swelling);
+        if (!isNaN(sNum)) {
+            sumSwelling += sNum;
+            cntSwelling++;
+        }
+    }
+
+    if (avgStepsEl) avgStepsEl.textContent = cntSteps ? Math.round(sumSteps / cntSteps) : "-";
+    if (avgPainEl) avgPainEl.textContent = cntPain ? (sumPain / cntPain).toFixed(1) : "-";
+    if (avgSwellingEl) avgSwellingEl.textContent = cntSwelling ? (sumSwelling / cntSwelling).toFixed(1) : "-";
+
+    // 找出全期間最痛的日期列表
+    for (var j = 0; j < records.length; j++) {
+        var rp = Number(records[j].pain);
+        if (!isNaN(rp) && rp > maxPain) {
+            maxPain = rp;
+        }
+    }
+    var topList = [];
+    if (maxPain >= 0) {
+        for (var k = 0; k < records.length; k++) {
+            var rp2 = Number(records[k].pain);
+            if (!isNaN(rp2) && rp2 === maxPain) {
+                topList.push(toDateOnly(records[k].date));
+            }
+        }
+    }
+    if (topPainDaysEl) {
+        if (topList.length === 0) {
+            topPainDaysEl.textContent = "-";
+        } else {
+            // 若天數太多，只顯示前 5 天＋...
+            var listStr = topList.slice(0,5).join("、");
+            if (topList.length > 5) {
+                listStr += " 等 " + topList.length + " 天（疼痛 " + maxPain + " 分）";
+            } else {
+                listStr += "（疼痛 " + maxPain + " 分）";
+            }
+            topPainDaysEl.textContent = listStr;
+        }
+    }
+
+    // 畫表格內容
+    tbody.innerHTML = "";
     wrapper.style.display = "block";
 
-    for (var i = 0; i < records.length; i++) {
-        var rec = records[i];
+    for (var idx = 0; idx < records.length; idx++) {
+        var rec = records[idx];
         var tr = document.createElement("tr");
 
         var painNum = Number(rec.pain);
@@ -592,73 +668,74 @@ function renderTable(){
             return c;
         }
 
-    // 1–6 基本狀態
-    tr.appendChild(td(toDateOnly(rec.date)));   // 日期
-    tr.appendChild(td(rec.steps));              // 步數
-    tr.appendChild(td(rec.pain));               // 疼痛
-    tr.appendChild(td(rec.swelling));           // 腫脹
-    tr.appendChild(td(rec.walkMinutes));        // 走多久痛
-    tr.appendChild(td(rec.standMinutes));       // 站多久痛
+        // 1–6 基本狀態
+        tr.appendChild(td(toDateOnly(rec.date)));
+        tr.appendChild(td(rec.steps));
+        tr.appendChild(td(rec.pain));
+        tr.appendChild(td(rec.swelling));
+        tr.appendChild(td(rec.walkMinutes));
+        tr.appendChild(td(rec.standMinutes));
 
-    // 7–12 功能表現：六欄
-    tr.appendChild(td(rec.upStairs || ""));     // 上樓梯
-    tr.appendChild(td(rec.downStairs || ""));   // 下樓梯
-    tr.appendChild(td(rec.squat || ""));        // 蹲下
-    tr.appendChild(td(rec.ankleTwist || ""));   // 腳踝扭轉
-    tr.appendChild(td(rec.singleLeg || ""));    // 單腳站立
-    tr.appendChild(td(rec.drive || ""));        // 開車
+        // 7–12 功能表現：六欄
+        tr.appendChild(td(rec.upStairs || ""));
+        tr.appendChild(td(rec.downStairs || ""));
+        tr.appendChild(td(rec.squat || ""));
+        tr.appendChild(td(rec.ankleTwist || ""));
+        tr.appendChild(td(rec.singleLeg || ""));
+        tr.appendChild(td(rec.drive || ""));
 
-    // 13 復健與治療
-    var rehabText = (rec.rehab && rec.rehab.length) ? rec.rehab.join("、") : "";
-    tr.appendChild(td(rehabText));
+        // 13 復健與治療
+        var rehabTextRow = (rec.rehab && rec.rehab.length) ? rec.rehab.join("、") : "";
+        tr.appendChild(td(rehabTextRow));
 
-    // 14 處置（含其他）
-    var careDisplay = (rec.care && rec.care.length) ? rec.care.join("、") : "";
-    if (rec.careOtherText) {
-        if (careDisplay) {
-            careDisplay = careDisplay + "、其他：" + rec.careOtherText;
-        } else {
-            careDisplay = "其他：" + rec.careOtherText;
+        // 14 處置（含其他）
+        var careDisplayRow = (rec.care && rec.care.length) ? rec.care.join("、") : "";
+        if (rec.careOtherText) {
+            if (careDisplayRow) {
+                careDisplayRow = careDisplayRow + "、其他：" + rec.careOtherText;
+            } else {
+                careDisplayRow = "其他：" + rec.careOtherText;
+            }
         }
-    }
-    tr.appendChild(td(careDisplay));
+        tr.appendChild(td(careDisplayRow));
 
-    // 15 輔具
-    var assistText = (rec.assist && rec.assist.length) ? rec.assist.join("、") : "";
-    tr.appendChild(td(assistText));
+        // 15 輔具
+        var assistTextRow = (rec.assist && rec.assist.length) ? rec.assist.join("、") : "";
+        tr.appendChild(td(assistTextRow));
 
-    // 16 功能受限
-    var limitText = (rec.limit && rec.limit.length) ? rec.limit.join("、") : "";
-    tr.appendChild(td(limitText));
+        // 16 功能受限
+        var limitTextRow = (rec.limit && rec.limit.length) ? rec.limit.join("、") : "";
+        tr.appendChild(td(limitTextRow));
 
-    // 17–19 其他照護需求 / 支出 / 備註
-    tr.appendChild(td(rec.careNeed));
-    tr.appendChild(td(rec.expense));
-    tr.appendChild(td(rec.note));
+        // 17–19 其他照護需求 / 支出 / 備註
+        tr.appendChild(td(rec.careNeed));
+        tr.appendChild(td(rec.expense));
+        tr.appendChild(td(rec.note));
 
-    // 20 操作欄：載入 / 刪除
-    var opTd = document.createElement("td");
+        // 20 操作欄：載入 / 刪除
+        var opTd = document.createElement("td");
 
-    var editBtn = document.createElement("button");
-    editBtn.textContent = "載入";
-    editBtn.type = "button";
-    editBtn.className = "edit-record-btn";
-    editBtn.setAttribute("data-date", rec.date);
-    opTd.appendChild(editBtn);
+        var editBtn = document.createElement("button");
+        editBtn.textContent = "載入";
+        editBtn.type = "button";
+        editBtn.className = "edit-record-btn";
+        editBtn.setAttribute("data-date", rec.date);
+        opTd.appendChild(editBtn);
 
-    var delBtn = document.createElement("button");
-    delBtn.textContent = "刪除";
-    delBtn.type = "button";
-    delBtn.className = "delete-record-btn";
-    delBtn.style.marginLeft = "6px";
-    delBtn.setAttribute("data-date", rec.date);
-    opTd.appendChild(delBtn);
+        var delBtn = document.createElement("button");
+        delBtn.textContent = "刪除";
+        delBtn.type = "button";
+        delBtn.className = "delete-record-btn";
+        delBtn.style.marginLeft = "6px";
+        delBtn.setAttribute("data-date", rec.date);
+        opTd.appendChild(delBtn);
 
-    tr.appendChild(opTd);
+        tr.appendChild(opTd);
 
         tbody.appendChild(tr);
     }
 }
+
 
 function fillFormFromRecord(rec) {
     document.getElementById("date").value = toDateOnly(rec.date);
